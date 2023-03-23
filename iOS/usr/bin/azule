@@ -744,14 +744,14 @@ if [ -n "${files[*]}" ]; then
         rm -rf "Payload/$appname/$(basename "$i")"
         mv "$i" "Payload/$appname/"
         Verbose "Copied $(basename "$i") to app directory" "$(basename "$i") couldn't be copied to app directory" 16 -v
-    done < <(find "$dir/Tweak" ! -type l -iname '*.bundle' ! -path '*.appex/*' ! -path '*.bundle/*' ! -path '*.framework/*' 2>/dev/null)
+    done < <(find "$dir/Tweak/Library/Application Support" ! -type l -iname '*.bundle' ! -path '*.appex/*' ! -path '*.bundle/*' ! -path '*.framework/*' 2>/dev/null)
 
     # MERGING APPLICATION SUPPORT
     while read -r i; do
         rm -rf "Payload/$appname/$(basename "$i")"
         mv "$i" "Payload/$appname/"
         Verbose "Copied $(basename "$i") to app directory" "$(basename "$i") couldn't be copied to app directory" 16 -v
-    done < <(find "$dir/Tweak" -mindepth 2 -maxdepth 2 ! -type l ! -path '*.appex/*' ! -path '*.bundle/*' ! -path '*.framework/*' 2>/dev/null)
+    done < <(find "$dir/Tweak/Library/Application Support" -mindepth 2 -maxdepth 2 ! -type l ! -path '*.appex/*' ! -path '*.bundle/*' ! -path '*.framework/*' 2>/dev/null)
 
     # MOVING EXTENSIONS
     while read -r i; do
@@ -934,7 +934,7 @@ if [ -n "$run" ] || [ -n "$foul_plist" ]; then
     Announce "Generating iPA..."
         
     if [ -n "$full_unzipped" ]; then
-        zip -r -qq -0 "$outdir" Payload
+        zip -r -qq "$outdir" Payload
         status="$?"
     else
         cp "$ipadir" "$outdir"
@@ -943,7 +943,7 @@ if [ -n "$run" ] || [ -n "$foul_plist" ]; then
             ziparr+=( "$k" )
         done < <(find Payload)
 
-        zip -qq -u -0 "$outdir" "${ziparr[@]}"
+        zip -qq -u "$outdir" "${ziparr[@]}"
         status="$?"
     fi
     Verbose "Generated IPA at $outdir" "Couldn't generate IPA" 25 -X
@@ -955,7 +955,7 @@ if [ -n "$run" ] || [ -n "$foul_plist" ]; then
             DTPlatformName="$(ExtractPlistValue DTPlatformName "$i")"
             if [ "$DTPlatformName" == "watchos" ]; then
                 if [ -d "$(dirname "$i")" ]; then
-                    zip -qq -d -0 "$outdir" "$(dirname "$i")/*" &>/dev/null
+                    zip -qq -d "$outdir" "$(dirname "$i")/*" &>/dev/null
                     stat="$?"
                     if [ "$stat" != "12" ]; then status=$(( status + "$stat" )); fi
                 fi
@@ -966,7 +966,7 @@ if [ -n "$run" ] || [ -n "$foul_plist" ]; then
 
     # REMOVING EXTENSIONS
     if [ -n "$remove_extensions" ]; then
-        zip -qq -d -0 "$outdir" "Payload/*.app/PlugIns/*" &>/dev/null
+        zip -qq -d "$outdir" "Payload/*.app/PlugIns/*" &>/dev/null
         stat="$?"
         if [ "$stat" != "12" ]; then status="$stat"; fi
         Verbose "Removed Extensions" "Couldn't Remove Extensions" -x
